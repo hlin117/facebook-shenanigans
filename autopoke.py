@@ -10,7 +10,7 @@ BASE_URL = "http://m.facebook.com/"
 def main():
 
 	# Get test email and password from local file
-	email, password, allowed_pokes = getLoginInfo()
+	email, password, allowed_pokes = getLoginInfo('testinfo')
 
 	# Get FB session
 	session = login(email, password)
@@ -72,9 +72,9 @@ def login(email, password):
 		req = session.post(loginURL, data)
 		soup = BeautifulSoup(req.text)
 
-
-		if "Welcome" in soup.title: return -2
-		elif "Security" in soup.title: return -3
+		# Return things
+		if "Welcome" in soup.title.text: return -2
+		elif "Security" in soup.title.text: return -3
 		return session
 
 	except: return -1
@@ -127,9 +127,13 @@ The third line is the list of allowed pokes.
 This information is not hardcoded so as to
 keep it private in the repository.
 '''
-def getLoginInfo():
-	f = open('testinfo', 'r')
-	return f.readline(), f.readline(), eval(f.readline())
+def getLoginInfo(filename):
+	f = open(filename, 'r')
+	email = f.readline().rstrip()
+	password = f.readline().rstrip()
+	allowed = f.readline().rstrip()
+	f.close()
+	return email, password, eval(allowed)
 
 '''
 Takes a request and opens the returned HTML in Firefox.

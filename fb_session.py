@@ -1,12 +1,14 @@
+#!/usr/bin/env python2.7
+
 import requests
 from bs4 import BeautifulSoup
 import codecs
 import os
 import sys
 import SocketServer
+import getpass
 
 DEFAULT_PORT = 6666
-DEBUG = True
 
 BASE_URL = "http://m.facebook.com/"
 LOGIN_INFO_PATH = "testinfo"
@@ -17,7 +19,10 @@ def main():
 
 	# Create FB Session and handler
 	global session
-	session = getSession(DEBUG)
+	session = getSession()
+	if session == False:
+		print "Session aborted.", '\n'
+		return
 
 	# Get port
 	port = DEFAULT_PORT
@@ -79,24 +84,22 @@ def getSession(debug = False):
 	password = ""
 
 	# Get username and password depending on whether in debug mode or not
-	if debug: email, password = getLoginInfo()
-	else:
-		print '\n', "Please enter your email address:", '\n'
-		email = raw_input()
-		print '\n', "Please enter your FB password:", '\n'
-		password = raw_input()
+	print '\n', "Please provide your Facebook credentials."
+	email = raw_input("Email Address: ")
+	password = getpass.getpass("FB Password: ")
+	print
 
 	# Create FB Session
 	session = login(email, password)
 	if session == -1:
 		print "Connection failed."
-		return
+		return False
 	elif session == -2:
 		print "Authentication failed."
-		return
+		return False
 	elif session == -3:
 		print "Security check was given."
-		return
+		return False
 
 	return session
 
@@ -140,29 +143,6 @@ def login(email, password):
 		return session
 
 	except: return -1
-
-
-################################################################################
-# Code for Testing
-################################################################################
-
-'''
-Reads the testinfo file.
-
-The first two lines of which are the email and 
-password used for debugging. 
-
-The third line is ignored.
-
-This information is not hardcoded so as to
-keep it private in the repository.
-'''
-def getLoginInfo():
-	f = open(LOGIN_INFO_PATH, 'r')
-	email = f.readline().rstrip()
-	password = f.readline().rstrip()
-	f.close()
-	return email, password
 
 
 if __name__ == "__main__": main()

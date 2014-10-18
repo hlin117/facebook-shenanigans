@@ -6,8 +6,7 @@ import socket
 import sys
 import time
 
-CHECK_INTERVAL = 2
-
+DEFAULT_INTERVAL = 2
 DEFAULT_PORT = 6666
 
 BASE_URL = "http://m.facebook.com/"
@@ -20,22 +19,30 @@ def main():
 	if len(sys.argv) > 1: port = int(sys.argv[1])
 
 	# Get check interval
-	interval = CHECK_INTERVAL
+	interval = DEFAULT_INTERVAL
 	if len(sys.argv) > 2: interval = int(sys.argv[2])
 
-	# Read quick info for testing
-	email, password, allowed_pokes = getLoginInfo()
-
+	# Get people who can be poked
+	allowed_pokes = []
+	print '\n', "Welcome to autopoke.py!"
+	print "Before we begin, we need to know who we have permission to poke."
+	print "Please enter the full Facebook names of everyone we can poke."
+	print "When you are finished, enter a blank line.", '\n'
 	while(True):
+		name = raw_input("We can poke: ")
+		if name == "": break
+		allowed_pokes.append(name)
+	print '\n', "Great! We will poke", len(allowed_pokes), "people."
+	print "We will check for new pokes every", interval, "second(s)."
+	print '\n', "At any point, hit Control-C to stop.", '\n'
+	print "Waiting for pokes...", '\n'
 
-		print "Checking for new pokes..."
-		print
+	# Start poking
+	while(True):
 		pokes = pokeBack(port, allowed_pokes)
 		if pokes == False:
 			print "Poke checking failed."
 			return
-		print
-
 		time.sleep(interval)
 
 '''
@@ -99,7 +106,7 @@ def pokeBack(port, allowed_pokes):
 	poke_links = [BASE_URL + div.findAll('a')[2]['href'] for div in poke_divs]
 
 	# Poke allowed people back
-	if len(names) == 0: print "No one poked you :("
+	if len(names) > 0: print
 	for i in range(len(names)):
 		print names[i], "poked you!"
 		if names[i] in allowed_pokes:
@@ -107,6 +114,7 @@ def pokeBack(port, allowed_pokes):
 			print "Poked", names[i], "back."
 		else:
 			print "You did not give permission to poke", names[i], "back."
+	if len(names) > 0: print
 
 
 if __name__ == "__main__": main()

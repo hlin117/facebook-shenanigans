@@ -2,114 +2,107 @@ import requests
 from bs4 import BeautifulSoup
 import codecs
 import os
-import urllib2
-import cookielib
+import socket
+import sys
+import time
+
+CHECK_INTERVAL = 2
+
+DEFAULT_PORT = 6666
 
 BASE_URL = "http://m.facebook.com/"
+LOGIN_INFO_PATH = "testinfo"
 
 def main():
 
-	# Get test email and password from local file
-	email, password, allowed_pokes = getLoginInfo('testinfo')
+	# Get port
+	port = DEFAULT_PORT
+	if len(sys.argv) > 1: port = int(sys.argv[1])
 
-	# Get FB session
-	session = login(email, password)
-	if session == -1:
-		print "Connection failed."
-		return
-	elif session == -2:
-		print "Authentication failed."
-		return
-	elif session == -3:
-		print "Security check was given."
-		return
+	# Read quick info for testing
+	email, password, allowed_pokes = getLoginInfo()
 
-	# Check for recent pokes
-	pokes = checkForPokes(session, allowed_pokes)
-	if pokes == -1:
-		print "Connection failed."
-		return
-	elif pokes == -2:
-		print "Authentication failed."
+	while(True):
 
-	print pokes
+		print "Checking for new pokes..."
+		print
+		pokes = pokeBack(port, allowed_pokes)
+		if pokes == False:
+			print "Poke checking failed."
+			return
+		print
 
-################################################################################
-# Facebook Functions
-################################################################################
+		time.sleep(CHECK_INTERVAL)
+
+'''
+Sends a GET request through the session on the given port.
+The GET request will carry the provided url.
+The text of FB's response is returned.
+'''
+def getResponse(url, port):
+
+	try: 
+
+		# Connect to fb_session
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock.connect(('localhost', port))
+
+		# Send type and url payload
+		payload = {}
+		payload['type'] = 'GET'
+		payload['url'] = url
+		sock.sendall(str(payload))
+
+		# Use string buffer to read everything from socket
+		buff = ""
+		data = True
+		while data:
+			data = sock.recv(1024)
+			buff += data
+		return buff
+
+	except:
+
+		print "Could not connect to server on " + str(port)
+		return False
 
 
 '''
-Logs into Facebook with the given email and password.
-Returns a Requests session for further requests.
-Returns error code -1 for failed connection and -2 for bad login credentials.
-Returns -3 if a security check was given.
-'''
-def login(email, password):
-
-	try:
-
-		loginURL = BASE_URL + 'login.php'
-
-		# Sent GET Request to get form data
-		req = requests.get(loginURL)
-		soup = BeautifulSoup(req.text)
-
-		# Add form data to data dictionary
-		data = {}
-		dataInputs = [tag for tag in soup.form.children if tag.name == 'input']
-		for tag in dataInputs:
-			name = tag['name']
-			data[name] = soup('input', {'name' : name})[0]['value']
-
-		# Add email and password
-		data['email'] = email
-		data['pass'] = password
-		data['login'] = 'Log In'
-
-		# Create session
-		session = requests.Session()
-		req = session.post(loginURL, data)
-		soup = BeautifulSoup(req.text)
-
-		# Return things
-		if "Welcome" in soup.title.text: return -2
-		elif "Security" in soup.title.text: return -3
-		return session
-
-	except: return -1
-
-
-'''
-Gets the active pokes from the provided FB session.
+Gets the active pokes from the provided FB_Session port.
 Returns a list of links to access to poke back everyone.
-Returns error code -1 for failed connection and -2 for bad login credentials.
 '''
-def checkForPokes(session, allowed_pokes):
+def pokeBack(port, allowed_pokes):
 
 	pokeURL = BASE_URL + 'pokes'
 
-	# Navigate to the pokes page
-	req = session.get(pokeURL)
-	soup = BeautifulSoup(req.text)
+	# Get data from pokes page
+	response = getResponse(pokeURL, port)
+	if response == False:
+		print "GET request routing failed."
+		return False
+	soup = BeautifulSoup(response)
 
-	#showHTML(req)
-
-	# Get links to poke people back
+	# Filter down to divs of people to poke back
 	class_filter = soup.findAll('div', {'class' : 'bd'})
 	poke_divs = [div for div in class_filter if 'poked you' in div.text]
-	pokes = [pokeURL + tag.find_all('a')[0]['href'] for tag in poke_divs]
+	
+	# Get people's names
+	name_links = [div.findAll('a')[0] for div in poke_divs]
+	profile_pics = [a.findAll('img')[0] for a in name_links]
+	names = [img['alt'] for img in profile_pics]
 
-	# Filter out links by people the code is allowed to poke
-	final_pokes = []
-	for poke in pokes:
-		print poke
-		name = poke.split('/')
-		print name
-		if name[-1] in allowed_pokes:
-			final_pokes.append(poke)
+	# Get poke back links
+	poke_links = [BASE_URL + div.findAll('a')[2]['href'] for div in poke_divs]
 
-	return final_pokes
+	# Poke allowed people back
+	if len(names) == 0: print "No one poked you :("
+	for i in range(len(names)):
+		print names[i], "poked you!"
+		if names[i] in allowed_pokes:
+			getResponse(poke_links[i], port)
+			print "Poked", names[i], "back."
+		else:
+			print "You did not give permission to poke", names[i], "back."
 
 
 ################################################################################
@@ -127,8 +120,8 @@ The third line is the list of allowed pokes.
 This information is not hardcoded so as to
 keep it private in the repository.
 '''
-def getLoginInfo(filename):
-	f = open(filename, 'r')
+def getLoginInfo():
+	f = open(LOGIN_INFO_PATH, 'r')
 	email = f.readline().rstrip()
 	password = f.readline().rstrip()
 	allowed = f.readline().rstrip()

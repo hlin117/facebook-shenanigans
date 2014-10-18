@@ -5,14 +5,13 @@ import os
 import urllib2
 import cookielib
 
-EMAIL = 'email'
-PASSWORD = 'password'
-
 BASE_URL = "http://m.facebook.com/"
 
 def main():
 
-	login(EMAIL, PASSWORD)
+	email, password = getLoginInfo()
+
+	login(email, password)
 
 '''
 Logs into Facebook with the given email and password.
@@ -45,6 +44,19 @@ def login(email, password):
 	print req.text
 
 	return session
+
+#########################
+# Code for Testing
+#########################
+
+'''
+Reads the testinfo file, the first two lines of which are the email and 
+password used for debugging. This information is not hardcoded so as to
+keep it private in the repository.
+'''
+def getLoginInfo():
+	f = open('testinfo', 'r')
+	return f.readline(), f.readline()
 
 
 

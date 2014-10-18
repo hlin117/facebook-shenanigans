@@ -1,7 +1,7 @@
+#!/usr/bin/env python2.7
+
 import requests
 from bs4 import BeautifulSoup
-import codecs
-import os
 import socket
 import sys
 import time
@@ -19,6 +19,10 @@ def main():
 	port = DEFAULT_PORT
 	if len(sys.argv) > 1: port = int(sys.argv[1])
 
+	# Get check interval
+	interval = CHECK_INTERVAL
+	if len(sys.argv) > 2: interval = int(sys.argv[2])
+
 	# Read quick info for testing
 	email, password, allowed_pokes = getLoginInfo()
 
@@ -32,7 +36,7 @@ def main():
 			return
 		print
 
-		time.sleep(CHECK_INTERVAL)
+		time.sleep(interval)
 
 '''
 Sends a GET request through the session on the given port.
@@ -103,41 +107,6 @@ def pokeBack(port, allowed_pokes):
 			print "Poked", names[i], "back."
 		else:
 			print "You did not give permission to poke", names[i], "back."
-
-
-################################################################################
-# Code for Testing
-################################################################################
-
-'''
-Reads the testinfo file.
-
-The first two lines of which are the email and 
-password used for debugging. 
-
-The third line is the list of allowed pokes.
-
-This information is not hardcoded so as to
-keep it private in the repository.
-'''
-def getLoginInfo():
-	f = open(LOGIN_INFO_PATH, 'r')
-	email = f.readline().rstrip()
-	password = f.readline().rstrip()
-	allowed = f.readline().rstrip()
-	f.close()
-	return email, password, eval(allowed)
-
-'''
-Takes a request and opens the returned HTML in Firefox.
-This function was written specifically for my machine running Ubuntu.
-It will likely fail in other environments.
-'''
-def showHTML(request):
-	f = codecs.open('output.html', 'w', 'utf-8')
-	f.write(request.text)
-	f.close()
-	os.system('firefox output.html')
 
 
 if __name__ == "__main__": main()

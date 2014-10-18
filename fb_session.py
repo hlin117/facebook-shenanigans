@@ -2,8 +2,6 @@
 
 import requests
 from bs4 import BeautifulSoup
-import codecs
-import os
 import sys
 import SocketServer
 import getpass

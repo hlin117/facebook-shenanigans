@@ -51,10 +51,16 @@ class FB_Session_Handler(SocketServer.BaseRequestHandler):
 
 		# Attempt to load the data as a dictionary and load request type
 		req_type = ""
+		sender = ""
+		url = ""
 		payload = {}
 		try:
 			payload = eval(data)
 			req_type = payload['type']
+			sender = payload['sender']
+			url = payload['url']
+			print "Processing", req_type, "request from", sender
+			print "Destination:", '\t', url
 		except:
 			print "Improperly formatted payload; could not parse."
 			return
@@ -62,15 +68,42 @@ class FB_Session_Handler(SocketServer.BaseRequestHandler):
 		# Handle a GET request
 		if req_type == 'GET':
 			try:
-				url = payload['url']
 				req = session.get(url)
 				response = req.text.encode('utf-8')
-				print "Handled GET request."
+				print "Handled GET request successfully."
 				self.request.sendall(response)
 				return
 			except:
 			 	print "Failed to handle GET request."
 			 	return
+
+		# Handle POST request
+		if req_type == 'POST':
+
+			try:
+
+				# Attempt to parse headers and data
+				headers = {}
+				try: headers = eval(payload['headers'])
+				except: print "Could not parse headers."
+				data = {}
+				try: data = eval(payload['data'])
+				except: print "Could not parse data."
+
+				# Send POST request
+				req = session.post(url, data = data, headers = headers)
+				response = req.text.encode('utf-8')
+				print "Handled POST request successfully."
+				self.request.sendall(response)
+				return
+				
+			except:
+				print "Failed to handle POST request."
+				return
+
+		# Unknown request
+		else:
+			print "Request type", req_type, "not recognized. Reponse aborted."
 
 '''
 Gets the user's email and password.

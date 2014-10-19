@@ -1,6 +1,8 @@
 import requests
 import socket
 
+
+
 '''
 Sends a GET request through the session on the given port.
 The GET request will carry the provided url.
@@ -16,6 +18,7 @@ def getResponse(url, port):
 
 		# Send type and url payload
 		payload = {}
+		payload['sender'] = 'cmessenger'
 		payload['type'] = 'GET'
 		payload['url'] = url
 		sock.sendall(str(payload))
@@ -32,3 +35,42 @@ def getResponse(url, port):
 
 		print "Could not connect to server on " + str(port)
 		return False
+
+'''
+Sends a POST request through the session on the given port.
+The POST request will carry the provided url, data, and headers.
+The text of FB's response is returned.
+'''
+def postResponse(url, port, data = {}, headers = {}):
+
+	try: 
+
+		# Connect to fb_session
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock.connect(('localhost', port))
+
+		# Send type and url payload
+		payload = {}
+		payload['sender'] = 'cmessenger'
+		payload['type'] = 'POST'
+		payload['url'] = url
+		payload['data'] = str(data)
+		payload['headers'] = str(headers)
+		sock.sendall(str(payload))
+
+		# Use string buffer to read everything from socket
+		buff = ""
+		data = True
+		while data:
+			data = sock.recv(1024)
+			buff += data
+		return buff
+
+	except:
+
+		print "Could not connect to server on " + str(port)
+		return False
+
+print postResponse('http://m.facebok.com', 6666)
+
+

@@ -60,6 +60,7 @@ def getResponse(url, port):
 
 		# Send type and url payload
 		payload = {}
+		payload['sender'] = 'autopoke'
 		payload['type'] = 'GET'
 		payload['url'] = url
 		sock.sendall(str(payload))

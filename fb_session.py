@@ -59,7 +59,8 @@ class FB_Session_Handler(SocketServer.BaseRequestHandler):
 			req_type = payload['type']
 			sender = payload['sender']
 			url = payload['url']
-			print "Processing", req_type, "request from", sender
+			print "Sender:", '\t', sender
+			print "Request Type:", '\t', req_type
 			print "Destination:", '\t', url
 		except:
 			print "Improperly formatted payload; could not parse."
@@ -90,13 +91,16 @@ class FB_Session_Handler(SocketServer.BaseRequestHandler):
 				try: data = eval(payload['data'])
 				except: print "Could not parse data."
 
+				print "Headers:", '\t', headers
+				print "Data:", '\t\t', data
+
 				# Send POST request
 				req = session.post(url, data = data, headers = headers)
 				response = req.text.encode('utf-8')
 				print "Handled POST request successfully."
 				self.request.sendall(response)
 				return
-				
+
 			except:
 				print "Failed to handle POST request."
 				return

@@ -1,5 +1,5 @@
 #!/usr/bin/env python2.7
-
+from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import socket
@@ -23,7 +23,7 @@ def main():
 	if len(sys.argv) > 2: interval = int(sys.argv[2])
 
 	# Get people who can be poked
-	allowed_pokes = []
+	allowed_pokes = set()
 	print '\n', "Welcome to autopoke.py!"
 	print "Before we begin, we need to know who we have permission to poke."
 	print "Please enter the full Facebook names of everyone we can poke,"
@@ -38,15 +38,14 @@ def main():
 		if name.endswith(".txt"):
 			try:
 				text = open(name).read()
-				nameslist = text.split("\n")
-				allowed_pokes.extend(nameslist)
+				namesset = set(name for name in text.split("\n") if name != "")
+				allowed_pokes |= namesset
 				print "Read the text file named " + name
 			except:
 				print "Couldn't read the file called " + name
-				continue
 
 		else:
-			allowed_pokes.append(name)
+			allowed_pokes.add(name)
 	print '\n', "Great! We will poke", len(allowed_pokes), "people."
 	print "We will check for new pokes every", interval, "second(s)."
 	print '\n', "At any point, hit Control-C to stop.", '\n'
@@ -98,7 +97,7 @@ Gets the active pokes from the provided FB_Session port.
 Returns a list of links to access to poke back everyone.
 '''
 def pokeBack(port, allowed_pokes):
-
+	
 	pokeURL = BASE_URL + 'pokes'
 
 	# Get data from pokes page
@@ -126,7 +125,7 @@ def pokeBack(port, allowed_pokes):
 		print names[i], "poked you!"
 		if names[i] in allowed_pokes:
 			getResponse(poke_links[i], port)
-			print "Poked", names[i], "back."
+			print "Poked", names[i], "back"
 		else:
 			print "You did not give permission to poke", names[i], "back."
 	if len(names) > 0: print

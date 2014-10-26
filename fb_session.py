@@ -29,8 +29,8 @@ def main():
 	# Start socket server on given port
 	try:
 		print "Starting socket server on port", port
-                print "To start poking people, open a new terminal instance, and"
-                print "run the autopoke.py script"
+		print "To start poking people, open a new terminal instance, and"
+		print "run the autopoke.py script"
 		server = SocketServer.TCPServer(('localhost', port), FB_Session_Handler)
 		server.serve_forever()
 	except:
@@ -71,8 +71,8 @@ class FB_Session_Handler(SocketServer.BaseRequestHandler):
 				self.request.sendall(response)
 				return
 			except:
-			 	print "Failed to handle GET request."
-			 	return
+				print "Failed to handle GET request."
+				return
 
 '''
 Gets the user's email and password.

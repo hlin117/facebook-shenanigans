@@ -27,26 +27,26 @@ def main():
 	print '\n', "Welcome to autopoke.py!"
 	print "Before we begin, we need to know who we have permission to poke."
 	print "Please enter the full Facebook names of everyone we can poke,"
-        print "or the name of a text file containing names a line-delimited"
-        print "list of people to poke."
+	print "or the name of a text file containing names a line-delimited"
+	print "list of people to poke."
 	print "When you are finished, enter a blank line.", '\n'
 	while(True):
 		name = raw_input("We can poke: ")
 		if name == "": break
 
-                # If the "name" is the name of a text file
-                if name.endswith(".txt"):
-                    try:
-                        text = open(name).read()
-                        nameslist = text.split("\n")
-                        allowed_pokes.extend(nameslist)
-                        print "Read the text file named " + name
-                    except:
-                        print "Couldn't read the file called " + name
-                        continue
+		# If the "name" is the name of a text file
+		if name.endswith(".txt"):
+			try:
+				text = open(name).read()
+				nameslist = text.split("\n")
+				allowed_pokes.extend(nameslist)
+				print "Read the text file named " + name
+			except:
+				print "Couldn't read the file called " + name
+				continue
 
-                else: 
-                    allowed_pokes.append(name)
+		else:
+			allowed_pokes.append(name)
 	print '\n', "Great! We will poke", len(allowed_pokes), "people."
 	print "We will check for new pokes every", interval, "second(s)."
 	print '\n', "At any point, hit Control-C to stop.", '\n'
@@ -67,7 +67,7 @@ The text of FB's response is returned.
 '''
 def getResponse(url, port):
 
-	try: 
+	try:
 
 		# Connect to fb_session
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -111,7 +111,7 @@ def pokeBack(port, allowed_pokes):
 	# Filter down to divs of people to poke back
 	class_filter = soup.findAll('div', {'class' : 'bd'})
 	poke_divs = [div for div in class_filter if 'poked you' in div.text]
-	
+
 	# Get people's names
 	name_links = [div.findAll('a')[0] for div in poke_divs]
 	profile_pics = [a.findAll('img')[0] for a in name_links]

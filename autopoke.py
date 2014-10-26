@@ -130,7 +130,8 @@ def pokeBack(port, allowed_pokes):
 		print names[i], "poked you!"
 		if names[i] in allowed_pokes:
 			getResponse(poke_links[i], port)
-                        print "Poked" + names[i] + "back at " + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        print "Poked " + names[i] + " back on " + date_time[0] + " at " + date_time[1]
 		else:
 			print "You did not give permission to poke", names[i], "back."
 	if len(names) > 0: print

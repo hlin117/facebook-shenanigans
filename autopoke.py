@@ -46,6 +46,11 @@ def main():
 
 		else:
 			allowed_pokes.add(name)
+
+	if len(allowed_pokes) == 0:
+		print "Error! You selected no one to poke."
+		sys.exit(0)
+
 	print '\n', "Great! We will poke", len(allowed_pokes), "people."
 	print "We will check for new pokes every", interval, "second(s)."
 	print '\n', "At any point, hit Control-C to stop.", '\n'
@@ -125,7 +130,7 @@ def pokeBack(port, allowed_pokes):
 		print names[i], "poked you!"
 		if names[i] in allowed_pokes:
 			getResponse(poke_links[i], port)
-			print "Poked", names[i], "back"
+                        print "Poked" + names[i] + "back at " + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 		else:
 			print "You did not give permission to poke", names[i], "back."
 	if len(names) > 0: print

@@ -29,6 +29,8 @@ def main():
 	# Start socket server on given port
 	try:
 		print "Starting socket server on port", port
+                print "To start poking people, open a new terminal instance, and"
+                print "run the autopoke.py script"
 		server = SocketServer.TCPServer(('localhost', port), FB_Session_Handler)
 		server.serve_forever()
 	except:

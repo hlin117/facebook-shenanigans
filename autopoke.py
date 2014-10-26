@@ -26,12 +26,27 @@ def main():
 	allowed_pokes = []
 	print '\n', "Welcome to autopoke.py!"
 	print "Before we begin, we need to know who we have permission to poke."
-	print "Please enter the full Facebook names of everyone we can poke."
+	print "Please enter the full Facebook names of everyone we can poke,"
+        print "or the name of a text file containing names a line-delimited"
+        print "list of people to poke."
 	print "When you are finished, enter a blank line.", '\n'
 	while(True):
 		name = raw_input("We can poke: ")
 		if name == "": break
-		allowed_pokes.append(name)
+
+                # If the "name" is the name of a text file
+                if name.endswith(".txt"):
+                    try:
+                        text = open(name).read()
+                        nameslist = text.split("\n")
+                        allowed_pokes.extend(nameslist)
+                        print "Read the text file named " + name
+                    except:
+                        print "Couldn't read the file called " + name
+                        continue
+
+                else: 
+                    allowed_pokes.append(name)
 	print '\n', "Great! We will poke", len(allowed_pokes), "people."
 	print "We will check for new pokes every", interval, "second(s)."
 	print '\n', "At any point, hit Control-C to stop.", '\n'
